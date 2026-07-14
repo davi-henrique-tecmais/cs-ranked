@@ -1,7 +1,7 @@
 {
   "app": "CS RANKED",
   "version": 1,
-  "exportedAt": "2026-07-14T18:18:07.661Z",
+  "exportedAt": "2026-07-14T18:22:50.704Z",
   "data": {
     "baseRating": 0,
     "matches": [],
@@ -14,6 +14,69 @@
     },
     "exp": {
       "matches": [
+        {
+          "id": "90c73bf9-6bde-407f-837e-3edbe71a0f01",
+          "createdAt": "2026-07-14T18:22:11.486Z",
+          "map": "train",
+          "teamAIds": [
+            "cicero",
+            "vinicius",
+            "davi"
+          ],
+          "teamBIds": [
+            "vini",
+            "pedro",
+            "handrei"
+          ],
+          "status": "completed",
+          "result": "teamA",
+          "teamARounds": 13,
+          "teamBRounds": 10,
+          "playerStats": {
+            "cicero": {
+              "kills": 11,
+              "deaths": 1,
+              "assists": 1,
+              "mvp": 1,
+              "score": 1
+            },
+            "vinicius": {
+              "kills": 1,
+              "deaths": 1,
+              "assists": 1,
+              "mvp": 1,
+              "score": 1
+            },
+            "davi": {
+              "kills": 1,
+              "deaths": 1,
+              "assists": 1,
+              "mvp": 1,
+              "score": 1
+            },
+            "vini": {
+              "kills": 1,
+              "deaths": 1,
+              "assists": 1,
+              "mvp": 1,
+              "score": 1
+            },
+            "pedro": {
+              "kills": 1,
+              "deaths": 1,
+              "assists": 1,
+              "mvp": 1,
+              "score": 1
+            },
+            "handrei": {
+              "kills": 1,
+              "deaths": 1,
+              "assists": 1,
+              "mvp": 1,
+              "score": 1
+            }
+          }
+        },
         {
           "id": "a6339f75-ffcf-4138-887f-3bcedd75766d",
           "createdAt": "2026-07-14T15:18:35.584Z",
