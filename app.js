@@ -1,5 +1,6 @@
 const STORAGE_KEY = "cs2-bot-premier-tracker-v1";
 const BACKUP_VERSION = 1;
+const STATIC_STATE_URL = "exp.json";
 const MAX_PLAYER_OVERALL = 140;
 const COMPETITIVE_TEAM_COUNT = 16;
 const SWISS_TARGET_RECORD = 3;
@@ -318,6 +319,7 @@ elements.matchDialog.addEventListener("click", (event) => {
 });
 
 render();
+initializeStaticState();
 
 function loadState() {
   try {
@@ -325,13 +327,7 @@ function loadState() {
     if (!raw) return getDefaultState();
 
     const parsed = JSON.parse(raw);
-    return {
-      baseRating: Number.isFinite(parsed.baseRating) ? parsed.baseRating : 0,
-      matches: Array.isArray(parsed.matches) ? parsed.matches : [],
-      esports: normalizeEsports(parsed.esports),
-      competitive: normalizeCompetitive(parsed.competitive),
-      exp: normalizeExp(parsed.exp),
-    };
+    return normalizeAppState(parsed);
   } catch {
     return getDefaultState();
   }
@@ -356,6 +352,10 @@ function getDefaultState() {
 }
 
 function saveState() {
+  saveStateLocally();
+}
+
+function saveStateLocally() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
@@ -428,10 +428,9 @@ function exportBackup() {
   const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
-  const dateStamp = new Date().toISOString().slice(0, 10);
 
   link.href = url;
-  link.download = `cs2-bot-ranking-backup-${dateStamp}.json`;
+  link.download = "exp.json";
   document.body.appendChild(link);
   link.click();
   link.remove();
@@ -462,9 +461,10 @@ function importBackup(event) {
       closeExpMatch();
       closeExpPlayerDetail();
       closeCompetitiveMatch();
-      window.alert("Backup imported successfully.");
-    } catch {
-      window.alert("I couldn't import this file. Make sure it is a valid app backup.");
+      window.alert("Backup imported in this browser. To publish it for everyone, export and upload exp.json to the site files.");
+    } catch (error) {
+      console.warn("Import failed", error);
+      window.alert("I couldn't import this file. Check if it is a valid backup or exp.json file.");
     } finally {
       elements.backupFileInput.value = "";
     }
@@ -478,19 +478,59 @@ function importBackup(event) {
 
 function parseBackup(rawText) {
   const parsed = JSON.parse(rawText);
-  const data = parsed?.data ?? parsed;
+  return normalizeStatePayload(parsed);
+}
 
-  if (!data || typeof data !== "object" || !Array.isArray(data.matches)) {
-    throw new Error("Invalid backup");
+function normalizeStatePayload(payload) {
+  const data = payload?.data ?? payload;
+
+  if (!data || typeof data !== "object") {
+    throw new Error("Invalid data file");
   }
 
+  if (!data.exp && Array.isArray(data.matches) && data.matches.some(isExpMatchLike)) {
+    return normalizeAppState({
+      ...getDefaultState(),
+      exp: {
+        matches: data.matches,
+        playerImages: data.playerImages ?? {},
+      },
+    });
+  }
+
+  return normalizeAppState(data);
+}
+
+function isExpMatchLike(match) {
+  return Boolean(match && typeof match === "object" && (Array.isArray(match.teamAIds) || Array.isArray(match.teamBIds)));
+}
+
+function normalizeAppState(data) {
   return {
     baseRating: clamp(Number(data.baseRating) || 0, 0, 50000),
-    matches: data.matches.map(normalizeMatch).filter(Boolean),
+    matches: Array.isArray(data.matches) ? data.matches.map(normalizeMatch).filter(Boolean) : [],
     esports: normalizeEsports(data.esports),
     competitive: normalizeCompetitive(data.competitive),
     exp: normalizeExp(data.exp),
   };
+}
+
+async function initializeStaticState() {
+  try {
+    const response = await fetch(STATIC_STATE_URL, { cache: "no-store" });
+    if (response.status === 404) return;
+
+    if (!response.ok) {
+      throw new Error(`Static data load failed: ${response.status}`);
+    }
+
+    const payload = await response.json();
+    state = normalizeStatePayload(payload);
+    saveStateLocally();
+    render();
+  } catch (error) {
+    console.warn(`${STATIC_STATE_URL} unavailable or invalid. Using local data.`, error);
+  }
 }
 
 function normalizeExp(exp) {
