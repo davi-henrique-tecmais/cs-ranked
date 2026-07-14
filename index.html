@@ -604,6 +604,35 @@
           </div>
         </header>
         <section class="exp-detail-grid" id="expPlayerDetailStats"></section>
+        <section class="exp-player-history">
+          <div class="command-title">
+            <div>
+              <p class="panel-label">Recent history</p>
+              <h3>Last 10 matches</h3>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="exp-player-history-table">
+              <thead>
+                <tr>
+                  <th>Map</th>
+                  <th>Rounds</th>
+                  <th>Kills</th>
+                  <th>Assists</th>
+                  <th>Deaths</th>
+                  <th>KDA</th>
+                  <th>Score</th>
+                  <th>MVP</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="expPlayerHistoryBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state compact" id="expPlayerHistoryEmpty">
+            <strong>No completed matches for this player yet.</strong>
+          </div>
+        </section>
       </form>
     </dialog>
 

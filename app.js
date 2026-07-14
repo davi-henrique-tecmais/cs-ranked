@@ -212,6 +212,8 @@ const elements = {
   closeExpPlayerDetailBtn: document.querySelector("#closeExpPlayerDetailBtn"),
   expPlayerDetailName: document.querySelector("#expPlayerDetailName"),
   expPlayerDetailStats: document.querySelector("#expPlayerDetailStats"),
+  expPlayerHistoryBody: document.querySelector("#expPlayerHistoryBody"),
+  expPlayerHistoryEmpty: document.querySelector("#expPlayerHistoryEmpty"),
   expPlayerPhotoPreview: document.querySelector("#expPlayerPhotoPreview"),
   uploadExpPlayerPhotoBtn: document.querySelector("#uploadExpPlayerPhotoBtn"),
   removeExpPlayerPhotoBtn: document.querySelector("#removeExpPlayerPhotoBtn"),
@@ -1910,6 +1912,7 @@ function renderExpPlayerDetail() {
       ["GOATs", stats.goats],
     ])}
   `;
+  renderExpPlayerHistory(selectedExpPlayerId);
 }
 
 function getExpDetailSectionMarkup(items) {
@@ -1927,6 +1930,67 @@ function getExpDetailStatMarkup(label, value) {
       <strong>${escapeHtml(value)}</strong>
     </article>
   `;
+}
+
+function renderExpPlayerHistory(playerId) {
+  const history = getExpPlayerMatchHistory(playerId).slice(0, 10);
+  elements.expPlayerHistoryBody.innerHTML = "";
+  elements.expPlayerHistoryEmpty.style.display = history.length ? "none" : "block";
+
+  history.forEach((entry) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td class="map-cell">${escapeHtml(entry.map)}</td>
+      <td class="score-cell">${entry.teamRounds}x${entry.enemyRounds}</td>
+      <td class="stat-number">${entry.kills}</td>
+      <td class="stat-number">${entry.assists}</td>
+      <td class="stat-number">${entry.deaths}</td>
+      <td class="stat-number">${formatKda(entry.kda)}</td>
+      <td class="stat-number">${entry.score}</td>
+      <td class="stat-number">${entry.mvp}</td>
+      <td>${formatExpHistoryStatus(entry.status)}</td>
+    `;
+    elements.expPlayerHistoryBody.appendChild(row);
+  });
+}
+
+function getExpPlayerMatchHistory(playerId) {
+  return state.exp.matches
+    .filter((match) => {
+      if (match.status !== "completed") return false;
+      return match.teamAIds.includes(playerId) || match.teamBIds.includes(playerId);
+    })
+    .sort((matchA, matchB) => new Date(matchB.createdAt) - new Date(matchA.createdAt))
+    .map((match) => {
+      const isTeamA = match.teamAIds.includes(playerId);
+      const stats = match.playerStats[playerId] ?? normalizeExpPlayerStats(null);
+      const status = getExpPlayerMatchStatus(match, isTeamA);
+
+      return {
+        map: match.map,
+        teamRounds: isTeamA ? match.teamARounds : match.teamBRounds,
+        enemyRounds: isTeamA ? match.teamBRounds : match.teamARounds,
+        kills: stats.kills,
+        assists: stats.assists,
+        deaths: stats.deaths,
+        kda: calculateKda(stats.kills, stats.assists, stats.deaths),
+        score: stats.score,
+        mvp: stats.mvp,
+        status,
+      };
+    });
+}
+
+function getExpPlayerMatchStatus(match, isTeamA) {
+  if (match.result === "draw") return "draw";
+  if ((isTeamA && match.result === "teamA") || (!isTeamA && match.result === "teamB")) return "win";
+  return "loss";
+}
+
+function formatExpHistoryStatus(status) {
+  if (status === "win") return '<span class="history-status win">WIN</span>';
+  if (status === "loss") return '<span class="history-status loss">LOSS</span>';
+  return '<span class="history-status draw">DRAW</span>';
 }
 
 function closeExpPlayerDetail() {

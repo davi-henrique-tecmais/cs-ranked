@@ -1209,6 +1209,56 @@ tbody tr td:first-child {
   gap: 8px;
 }
 
+.exp-player-history {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(16, 21, 31, 0.72);
+  overflow: hidden;
+}
+
+.exp-player-history .command-title {
+  padding: 16px;
+  margin-bottom: 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.exp-player-history-table {
+  min-width: 840px;
+}
+
+.exp-player-history-table th:nth-child(n + 3),
+.exp-player-history-table td:nth-child(n + 3) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.history-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 58px;
+  min-height: 28px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.history-status.win {
+  color: var(--accent);
+  background: rgba(48, 242, 194, 0.08);
+}
+
+.history-status.loss {
+  color: var(--danger);
+  background: rgba(255, 85, 112, 0.08);
+}
+
+.history-status.draw {
+  color: var(--warning);
+  background: rgba(248, 200, 78, 0.08);
+}
+
 .team-cell {
   max-width: 260px;
   color: var(--muted);
